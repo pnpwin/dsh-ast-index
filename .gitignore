@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.dsh-ast-index/
+.npm-cache/
+.pnpm-store/
+.env
+.env.*
+*.log
+*.tgz
+.DS_Store

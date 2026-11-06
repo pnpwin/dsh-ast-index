@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "AST index search",
+    "description": "Find code definitions, references and outlines with fresh local ast-index results and bounded context."
+  }
+}

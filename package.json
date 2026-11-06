@@ -1,0 +1,23 @@
+{
+  "name": "@pnpwin/dsh-ast-index",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Native DSH/Cordis integration for defendend's ast-index: bounded structural code navigation with local indexing.",
+  "license": "MIT",
+  "author": "pnpwin",
+  "homepage": "https://github.com/pnpwin/dsh-ast-index#readme",
+  "repository": { "type": "git", "url": "https://github.com/pnpwin/dsh-ast-index.git" },
+  "bugs": { "url": "https://github.com/pnpwin/dsh-ast-index/issues" },
+  "keywords": ["dsh", "cordis", "ast-index", "code-search", "bun", "agent-tools"],
+  "engines": { "dsh": ">=0.2.2-rc.1 <0.3.0" },
+  "exports": { ".": "./runtime.js", "./locale/*.json": "./locale/*.json", "./icon": "./icon.svg" },
+  "files": ["runtime.js", "index.js", "cordis.patch.yml", "locale/*.json", "icon.svg", "README.md", "README.ru.md", "LICENSE", "THIRD_PARTY_NOTICES.md", "CHANGELOG.md", "docs/*.md"],
+  "scripts": {
+    "test": "bun test --timeout 30000 test/",
+    "test:node": "node --test test/*.test.js",
+    "pack:check": "bun run scripts/check-package.mjs",
+    "pack": "bun pm pack --ignore-scripts --destination dist"
+  },
+  "dsh": { "bundle": { "patch": "./cordis.patch.yml" } }
+}

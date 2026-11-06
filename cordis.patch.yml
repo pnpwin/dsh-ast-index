@@ -1,0 +1,5 @@
+- insert:
+    - id: pnpwin-ast-index
+      name: '@pnpwin/dsh-ast-index'
+      config:
+        executable: ast-index
