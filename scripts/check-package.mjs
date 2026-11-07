@@ -9,13 +9,16 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const run = promisify(execFile);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const expected = [
-  'package.json', 'runtime.js', 'index.js', 'cordis.patch.yml', 'locale/en.json', 'locale/ru.json',
+  'package.json', 'src/runtime.js', 'src/index.js', 'cordis.patch.yml', 'locale/en.json', 'locale/ru.json',
   'icon.svg', 'README.md', 'README.ru.md', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'CHANGELOG.md', 'docs/evaluation.md'
 ].sort();
 const manifest = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8'));
 assert.equal(manifest.name, '@pnpwin/dsh-ast-index');
 assert.equal(manifest.dsh.bundle.patch, './cordis.patch.yml');
-assert.equal(manifest.exports['.'], './runtime.js');
+assert.equal(manifest.exports['.'], './src/index.js');
+const allowedRootFiles = ['.gitignore', 'CHANGELOG.md', 'LICENSE', 'README.md', 'README.ru.md', 'THIRD_PARTY_NOTICES.md', 'cordis.patch.yml', 'icon.svg', 'package.json'].sort();
+const actualRootFiles = (await readdir(root, { withFileTypes: true })).filter(entry => !entry.isDirectory()).map(entry => entry.name).sort();
+assert.deepEqual(actualRootFiles, allowedRootFiles, 'Root must contain only documentation and required metadata/resources');
 assert.ok(!manifest.dependencies || Object.keys(manifest.dependencies).length === 0);
 for (const lifecycle of ['preinstall', 'install', 'postinstall', 'prepare', 'prepack', 'postpack']) assert.equal(manifest.scripts?.[lifecycle], undefined);
 
@@ -58,7 +61,9 @@ const verbose = (await run('tar', ['-tvzf', archive])).stdout;
 assert.ok(!verbose.split('\n').some(line => /^[lh]/.test(line)), 'Archive must not contain links');
 const unpacked = await mkdtemp(path.join(os.tmpdir(), 'dsh-ast-unpacked-'));
 await run('tar', ['-xzf', archive, '-C', unpacked]);
-const plugin = await import(pathToFileURL(path.join(unpacked, 'package/runtime.js')).href);
+const extractedRoot = path.join(unpacked, 'package');
+const extractedManifest = JSON.parse(await readFile(path.join(extractedRoot, 'package.json'), 'utf8'));
+const plugin = await import(pathToFileURL(path.join(extractedRoot, extractedManifest.exports['.'])).href);
 assert.equal(typeof plugin.apply, 'function');
 assert.equal(typeof plugin.createTool, 'function');
 assert.equal(plugin.toolSchema.name, 'ast_index');

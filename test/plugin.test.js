@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { mkdtemp, mkdir, writeFile, readFile, utimes, access } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, utimes, access, readdir } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { parseInput, buildCommand, quote, clip, createTool, apply } from '../index.js';
+import { parseInput, buildCommand, quote, clip, createTool, apply } from '../src/index.js';
 const run = promisify(execFile);
 const astExecutable = process.env.AST_INDEX_BIN || 'ast-index';
 
@@ -33,6 +33,15 @@ function mockContext({ mode = 'workspace-write', outside = false, result, runShe
   };
 }
 const exec = () => ({ agent: { session: { id: 'test' } }, signal: new AbortController().signal });
+
+test('package loads from src and root stays free of source files', async () => {
+  const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+  assert.equal(manifest.exports['.'], './src/index.js');
+  const allowed = ['.gitignore', 'CHANGELOG.md', 'LICENSE', 'README.md', 'README.ru.md', 'THIRD_PARTY_NOTICES.md', 'cordis.patch.yml', 'icon.svg', 'package.json'].sort();
+  const rootFiles = (await readdir(new URL('../', import.meta.url), { withFileTypes: true }))
+    .filter(entry => !entry.isDirectory()).map(entry => entry.name).sort();
+  assert.deepEqual(rootFiles, allowed);
+});
 
 test('small defaults and all intended actions', () => {
   assert.equal(parseInput({ action: 'symbol', query: 'foo' }).limit, 10);

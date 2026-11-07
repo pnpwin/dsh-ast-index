@@ -80,6 +80,10 @@ Prefer AST navigation for unknown code structure, exact definitions and function
 - Large repos may hit the 110-second subprocess timeout. Full rebuild can be slower than grep; use a smaller project root when appropriate.
 - Bun test support does not change the runtime of an already running DSH Host. `node:*` imports are intentionally portable; no standalone Node/Bun wrapper process is launched per query.
 
+## Source layout
+
+Plugin source files live under `src/`: DSH loads [src/index.js](<src/index.js>) through the package export, and [src/runtime.js](<src/runtime.js>) implements the tool. The root contains documentation, Git metadata, and only the manifest, Loader patch and icon needed for discovery/display. Existing `test/`, `locale/`, `scripts/`, `docs/` and `.github/` directories retain their roles and locations. Tests and archive validation enforce this root-file policy.
+
 ## Tests and packaging
 
 No npm dependencies or lifecycle/install scripts are required. Install the CLI first, then:
